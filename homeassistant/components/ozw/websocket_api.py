@@ -1,5 +1,6 @@
 """Web socket API for OpenZWave."""
 import logging
+
 from openzwavemqtt.const import (
     ATTR_CODE_SLOT,
     ATTR_LABEL,
@@ -21,13 +22,7 @@ from homeassistant.components import websocket_api
 from homeassistant.core import callback
 from homeassistant.helpers import config_validation as cv
 
-from .const import (
-    ATTR_CONFIG_PARAMETER,
-    ATTR_CONFIG_VALUE,
-    DOMAIN,
-    MANAGER,
-    OPTIONS,
-)
+from .const import ATTR_CONFIG_PARAMETER, ATTR_CONFIG_VALUE, DOMAIN, MANAGER, OPTIONS
 from .lock import ATTR_USERCODE
 from .migration import async_get_migration_data, async_migrate, map_node_values
 
