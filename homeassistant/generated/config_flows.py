@@ -46,6 +46,7 @@ FLOWS = [
     "dexcom",
     "dialogflow",
     "directv",
+    "dobiss",
     "doorbird",
     "dunehd",
     "dynalite",

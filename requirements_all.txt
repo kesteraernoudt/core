@@ -1345,6 +1345,9 @@ pydexcom==0.2.0
 # homeassistant.components.zwave
 pydispatcher==2.0.5
 
+# homeassistant.components.dobiss
+pydobiss==0.1.12
+
 # homeassistant.components.doods
 pydoods==1.0.2
 
