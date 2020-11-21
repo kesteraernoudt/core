@@ -45,6 +45,16 @@ class HADobissSwitch(SwitchEntity):
         self._dobissswitch = dobissswitch
 
     @property
+    def device_info(self):
+        """Information about this entity/device."""
+        return {
+            "identifiers": {(DOMAIN, self._dobissswitch.object_id)},
+            "name": self.name,
+            "manufacturer": "dobiss",
+            "dobiss_group": self._dobissswitch.groupname,
+        }
+
+    @property
     def icon(self):
         """Return the icon to use in the frontend"""
         return ICON_FROM_DOBISS[self._dobissswitch.icons_id]

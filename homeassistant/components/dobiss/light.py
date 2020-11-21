@@ -56,6 +56,16 @@ class HADobissLight(LightEntity):
         super().__init__()
         self._dobisslight = dobisslight
 
+    @property
+    def device_info(self):
+        """Information about this entity/device."""
+        return {
+            "identifiers": {(DOMAIN, self._dobisslight.object_id)},
+            "name": self.name,
+            "manufacturer": "dobiss",
+            "dobiss_group": self._dobisslight.groupname,
+        }
+
     async def async_added_to_hass(self):
         """Run when this Entity has been added to HA."""
         self._dobisslight.register_callback(self.async_write_ha_state)

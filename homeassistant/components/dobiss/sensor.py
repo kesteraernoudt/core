@@ -65,6 +65,16 @@ class HADobissSensor(Entity):
         self._dobisssensor = dobisssensor
 
     @property
+    def device_info(self):
+        """Information about this entity/device."""
+        return {
+            "identifiers": {(DOMAIN, self._dobisssensor.object_id)},
+            "name": self.name,
+            "manufacturer": "dobiss",
+            "dobiss_group": self._dobisssensor.groupname,
+        }
+
+    @property
     def available(self) -> bool:
         """Return True."""
         return True
