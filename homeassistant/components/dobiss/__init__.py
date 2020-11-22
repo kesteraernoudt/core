@@ -31,7 +31,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     dobiss = DobissAPI(entry.data["secret"], entry.data["host"], entry.data["secure"])
     hass.data[DOMAIN][entry.entry_id] = dobiss
 
-    logger.setLevel(logging.DEBUG)
+    # logger.setLevel(logging.DEBUG)
     await dobiss.discovery()
     hass.async_create_task(dobiss.dobiss_monitor())
 
