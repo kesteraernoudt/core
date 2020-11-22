@@ -23,13 +23,14 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     """Set up dobissswitch."""
 
     dobiss = hass.data[DOMAIN][config_entry.entry_id]
-    # _LOGGER.warn("set up dobiss switch on {}".format(dobiss.url))
+    # _LOGGER.warn(f"set up dobiss switch on {dobiss.host}")
 
     d_entities = dobiss.get_devices_by_type(DobissSwitch)
     entities = []
     for d in d_entities:
-        # _LOGGER.warn("set up dobiss switch on {}".format(dobiss.url))
-        entities.append(HADobissSwitch(d))
+        _LOGGER.warn(f"set up dobiss switch {d.name} on {dobiss.host}")
+        if not d.buddy:
+            entities.append(HADobissSwitch(d))
     if entities:
         async_add_entities(entities)
 
