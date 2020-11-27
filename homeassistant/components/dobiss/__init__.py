@@ -15,7 +15,7 @@ import requests
 
 # logger.setLevel(logging.DEBUG)
 
-PLATFORMS = ["light", "switch", "sensor"]
+PLATFORMS = ["light", "switch", "sensor", "binary_sensor"]
 # PLATFORMS = ["light"]
 
 
