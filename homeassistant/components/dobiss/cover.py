@@ -7,6 +7,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect
 
 from homeassistant.components.cover import (
     DEVICE_CLASS_SHADE,
+    DEVICE_CLASS_WINDOW,
     SUPPORT_CLOSE,
     SUPPORT_OPEN,
     SUPPORT_STOP,
@@ -14,6 +15,8 @@ from homeassistant.components.cover import (
 )
 
 from .const import DOMAIN
+
+from asyncio import wait
 
 import logging
 
@@ -52,13 +55,31 @@ class HADobissCover(CoverEntity):
 
     supported_features = SUPPORT_STOP | SUPPORT_OPEN | SUPPORT_CLOSE
 
-    decice_class = DEVICE_CLASS_SHADE
-
     def __init__(self, up: DobissSwitch, down: DobissSwitch):
         """Init dobiss Switch device."""
         super().__init__()
+        # do some hacky check to see which type it is --> todo: make this flexible!
+        # from dobiss: if it is a shade, up and down have the same name
+        # if it is a velux shade, up and down end in 'op' and 'neer'
+        # if it is a velux window, up and down end in 'open' and 'dicht'
+        self._device_class = DEVICE_CLASS_SHADE
+        self._is_velux = False
+        self._name = up.name
+        if up.name.endswith(" op"):
+            self._device_class = DEVICE_CLASS_SHADE
+            self._name = up.name[: -len(" op")]
+            self._is_velux = True
+        elif up.name.endswith(" open"):
+            self._device_class = DEVICE_CLASS_WINDOW
+            self._name = up.name[: -len(" open")]
+            self._is_velux = True
         self._up = up
         self._down = down
+
+    @property
+    def device_class(self):
+        """Return the class of this device, from component DEVICE_CLASSES."""
+        return self._device_class
 
     async def async_added_to_hass(self):
         """Run when this Entity has been added to HA."""
@@ -73,7 +94,7 @@ class HADobissCover(CoverEntity):
     @property
     def name(self):
         """Return the display name of this cover."""
-        return self._up.name
+        return self._name
 
     @property
     def unique_id(self):
@@ -93,11 +114,15 @@ class HADobissCover(CoverEntity):
     @property
     def is_closing(self):
         """Return if the cover is closing or not."""
+        if self._is_velux:
+            return None
         return self._down.value > 0 if self._down.value else None
 
     @property
     def is_opening(self):
         """Return if the cover is opening or not."""
+        if self._is_velux:
+            return None
         return self._up.value > 0 if self._up.value else None
 
     # These methods allow HA to tell the actual device what to do. In this case, move
@@ -112,5 +137,7 @@ class HADobissCover(CoverEntity):
 
     async def async_stop_cover(self, **kwargs):
         """Stop the cover."""
-        await self._up.turn_off()
-        await self._down.turn_off()
+        if self._is_velux:
+            await wait([self._up.turn_on(), self._down.turn_on()])
+        else:
+            await wait([self._up.turn_off(), self._down.turn_off()])
