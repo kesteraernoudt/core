@@ -19,7 +19,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.typing import HomeAssistantType
 
-from .const import DOMAIN, SIGNAL_NEST_UPDATE
+from .const import DATA_SUBSCRIBER, DOMAIN, SIGNAL_NEST_UPDATE
 from .device_info import DeviceInfo
 
 _LOGGER = logging.getLogger(__name__)
@@ -38,14 +38,12 @@ async def async_setup_sdm_entry(
 ) -> None:
     """Set up the sensors."""
 
-    subscriber = hass.data[DOMAIN][entry.entry_id]
+    subscriber = hass.data[DOMAIN][DATA_SUBSCRIBER]
     try:
         device_manager = await subscriber.async_get_device_manager()
     except GoogleNestException as err:
         _LOGGER.warning("Failed to get devices: %s", err)
         raise PlatformNotReady from err
-
-    # Fetch initial data so we have data when entities subscribe.
 
     entities = []
     for device in device_manager.devices.values():
