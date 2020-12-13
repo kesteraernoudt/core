@@ -80,13 +80,13 @@ SUPPORT_HYPERION = SUPPORT_COLOR | SUPPORT_BRIGHTNESS | SUPPORT_EFFECT
 
 # Usage of YAML for configuration of the Hyperion component is deprecated.
 PLATFORM_SCHEMA = vol.All(
-    cv.deprecated(CONF_HDMI_PRIORITY, invalidation_version="0.118"),
+    cv.deprecated(CONF_HDMI_PRIORITY),
     cv.deprecated(CONF_HOST),
     cv.deprecated(CONF_PORT),
-    cv.deprecated(CONF_DEFAULT_COLOR, invalidation_version="0.118"),
+    cv.deprecated(CONF_DEFAULT_COLOR),
     cv.deprecated(CONF_NAME),
     cv.deprecated(CONF_PRIORITY),
-    cv.deprecated(CONF_EFFECT_LIST, invalidation_version="0.118"),
+    cv.deprecated(CONF_EFFECT_LIST),
     PLATFORM_SCHEMA.extend(
         {
             vol.Required(CONF_HOST): cv.string,
@@ -342,7 +342,7 @@ class HyperionLight(LightEntity):
     @property
     def is_on(self) -> bool:
         """Return true if not black."""
-        return bool(self._client.is_on())
+        return bool(self._client.is_on()) and self._client.visible_priority is not None
 
     @property
     def icon(self) -> str:
@@ -413,7 +413,10 @@ class HyperionLight(LightEntity):
 
         # == Get key parameters ==
         brightness = kwargs.get(ATTR_BRIGHTNESS, self._brightness)
-        effect = kwargs.get(ATTR_EFFECT, self._effect)
+        if ATTR_EFFECT not in kwargs and ATTR_HS_COLOR in kwargs:
+            effect = KEY_EFFECT_SOLID
+        else:
+            effect = kwargs.get(ATTR_EFFECT, self._effect)
         rgb_color: Sequence[int]
         if ATTR_HS_COLOR in kwargs:
             rgb_color = color_util.color_hs_to_RGB(*kwargs[ATTR_HS_COLOR])
@@ -549,7 +552,7 @@ class HyperionLight(LightEntity):
                     rgb_color=visible_priority[const.KEY_VALUE][const.KEY_RGB],
                     effect=KEY_EFFECT_SOLID,
                 )
-            self.async_write_ha_state()
+        self.async_write_ha_state()
 
     def _update_effect_list(self, _: Optional[Dict[str, Any]] = None) -> None:
         """Update Hyperion effects."""
