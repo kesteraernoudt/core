@@ -9,7 +9,7 @@ from homeassistant.components.binary_sensor import (
 from homeassistant.core import callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 
-from .const import DOMAIN
+from .const import *  # pylint:disable=unused-import
 
 import logging
 
@@ -33,7 +33,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     d_entities = dobiss.get_devices_by_type(DobissBinarySensor)
     for d in d_entities:
         # _LOGGER.warn("set up dobiss binary sensor on {}".format(dobiss.host))
-        entities.append(HADobissBinarySensor(d))
+        entities.append(HADobissBinarySensor(d, config_entry))
 
     if entities:
         async_add_entities(entities)
@@ -46,14 +46,17 @@ class HADobissBinarySensor(BinarySensorEntity):
 
     should_poll = False
 
-    def __init__(self, dobisssensor: DobissBinarySensor):
+    def __init__(self, dobisssensor: DobissBinarySensor, config_entry):
         """Init dobiss Switch device."""
         super().__init__()
+        self._config_entry = config_entry
         self._dobisssensor = dobisssensor
 
     @property
     def is_on(self):
         """Return the state of the sensor."""
+        if self._config_entry.options.get(CONF_INVERT_BINARY_SENSOR):
+            return not self._dobisssensor.is_on
         return self._dobisssensor.is_on
 
     @property

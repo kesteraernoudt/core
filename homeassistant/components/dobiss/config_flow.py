@@ -4,6 +4,8 @@ import logging
 import voluptuous as vol
 
 from homeassistant import config_entries, core, exceptions
+import homeassistant.helpers.config_validation as cv
+from homeassistant.core import callback
 
 from .const import *  # pylint:disable=unused-import
 
@@ -54,6 +56,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
     CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_PUSH
 
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry):
+        """Get the options flow for this handler."""
+        return DobissOptionsFlowHandler(config_entry)
+
     async def async_step_user(self, user_input=None):
         """Handle the initial step."""
         errors = {}
@@ -92,3 +100,28 @@ class CannotConnect(exceptions.HomeAssistantError):
 
 class InvalidAuth(exceptions.HomeAssistantError):
     """Error to indicate there is invalid auth."""
+
+
+class DobissOptionsFlowHandler(config_entries.OptionsFlow):
+    """Handle a option flow."""
+
+    def __init__(self, config_entry: config_entries.ConfigEntry):
+        """Initialize options flow."""
+        self.config_entry = config_entry
+
+    async def async_step_init(self, user_input=None):
+        """Handle options flow."""
+        if user_input is not None:
+            return self.async_create_entry(title="", data=user_input)
+
+        data_schema = vol.Schema(
+            {
+                vol.Optional(
+                    CONF_INVERT_BINARY_SENSOR,
+                    default=self.config_entry.options.get(
+                        CONF_INVERT_BINARY_SENSOR, DEFAULT_INVERT_BINARY_SENSOR
+                    ),
+                ): cv.boolean
+            }
+        )
+        return self.async_show_form(step_id="init", data_schema=data_schema)

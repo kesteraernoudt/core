@@ -6,7 +6,7 @@ import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
-from .const import DOMAIN
+from .const import *  # pylint:disable=unused-import
 
 import logging
 
@@ -18,6 +18,8 @@ import requests
 PLATFORMS = ["light", "switch", "sensor", "cover", "binary_sensor"]
 # PLATFORMS = ["light"]
 
+unsub = None
+
 
 async def async_setup(hass: HomeAssistant, config: dict):
     """Set up the dobiss component."""
@@ -25,11 +27,20 @@ async def async_setup(hass: HomeAssistant, config: dict):
     return True
 
 
+async def update_listener(hass, entry):
+    """Handle options update."""
+    dobiss = hass.data[DOMAIN][entry.entry_id]
+    await dobiss.update_all(force=True)
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Set up dobiss from a config entry."""
 
     dobiss = DobissAPI(entry.data["secret"], entry.data["host"], entry.data["secure"])
     hass.data[DOMAIN][entry.entry_id] = dobiss
+
+    global unsub
+    unsub = entry.add_update_listener(update_listener)
 
     # logger.setLevel(logging.DEBUG)
     await dobiss.discovery()
@@ -45,6 +56,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Unload a config entry."""
+    unsub()
     unload_ok = all(
         await asyncio.gather(
             *[

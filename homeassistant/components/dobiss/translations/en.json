@@ -20,5 +20,14 @@
             }
         }
     },
+    "options": {
+        "step": {
+          "init": {
+            "data": {
+              "invert_binary_sensor": "Invert binary sensor state"
+            }
+          }
+        }
+    },
     "title": "dobiss"
 }

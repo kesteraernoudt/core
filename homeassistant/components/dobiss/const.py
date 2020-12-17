@@ -4,3 +4,7 @@ from homeassistant.const import CONF_HOST  # noqa: F401 pylint: disable=unused-i
 DOMAIN = "dobiss"
 CONF_SECRET = "secret"
 CONF_SECURE = "secure"
+
+# Options
+CONF_INVERT_BINARY_SENSOR = "invert_binary_sensor"
+DEFAULT_INVERT_BINARY_SENSOR = False
