@@ -245,7 +245,7 @@ ambiclimate==0.2.1
 amcrest==1.7.0
 
 # homeassistant.components.androidtv
-androidtv[async]==0.0.56
+androidtv[async]==0.0.57
 
 # homeassistant.components.anel_pwrctrl
 anel_pwrctrl-homeassistant==0.0.1.dev2
@@ -1331,7 +1331,7 @@ pycsspeechtts==1.0.4
 # pycups==1.9.73
 
 # homeassistant.components.daikin
-pydaikin==2.3.1
+pydaikin==2.4.0
 
 # homeassistant.components.danfoss_air
 pydanfossair==0.1.0
@@ -1458,7 +1458,7 @@ pyipma==2.0.5
 pyipp==0.11.0
 
 # homeassistant.components.iqvia
-pyiqvia==0.2.1
+pyiqvia==0.3.1
 
 # homeassistant.components.irish_rail_transport
 pyirishrail==0.0.2
@@ -1625,7 +1625,7 @@ pypoint==2.0.0
 pyprof2calltree==1.4.5
 
 # homeassistant.components.ps4
-pyps4-2ndscreen==1.1.1
+pyps4-2ndscreen==1.2.0
 
 # homeassistant.components.qvr_pro
 pyqvrpro==0.52
@@ -1861,7 +1861,7 @@ pytraccar==0.9.0
 pytrackr==0.0.5
 
 # homeassistant.components.tradfri
-pytradfri[async]==7.0.4
+pytradfri[async]==7.0.5
 
 # homeassistant.components.trafikverket_train
 # homeassistant.components.trafikverket_weatherstation
@@ -1907,7 +1907,7 @@ pyxeoma==1.4.1
 pyzbar==0.1.7
 
 # homeassistant.components.zerproc
-pyzerproc==0.3.0
+pyzerproc==0.4.3
 
 # homeassistant.components.qnap
 qnapstats==0.3.0
@@ -2248,7 +2248,7 @@ uvcclient==0.11.0
 vallox-websocket-api==2.4.0
 
 # homeassistant.components.venstar
-venstarcolortouch==0.12
+venstarcolortouch==0.13
 
 # homeassistant.components.vilfo
 vilfo-api-client==0.3.2
