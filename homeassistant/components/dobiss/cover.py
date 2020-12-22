@@ -88,7 +88,6 @@ class HADobissCover(CoverEntity):
         self._down.register_callback(self.async_write_ha_state)
         self._up.register_callback(self.up_callback)
         self._down.register_callback(self.down_callback)
-        _LOGGER.warn("registered callbacks")
 
     async def async_will_remove_from_hass(self):
         """Entity being removed from hass."""
@@ -96,7 +95,6 @@ class HADobissCover(CoverEntity):
         self._down.remove_callback(self.async_write_ha_state)
         self._up.remove_callback(self.up_callback)
         self._down.remove_callback(self.down_callback)
-        _LOGGER.warn("removed callbacks")
 
     @property
     def name(self):
