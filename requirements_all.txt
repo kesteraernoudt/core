@@ -1349,7 +1349,7 @@ pydexcom==0.2.0
 pydispatcher==2.0.5
 
 # homeassistant.components.dobiss
-pydobiss==0.1.20
+pydobiss==0.1.21
 
 # homeassistant.components.doods
 pydoods==1.0.2
