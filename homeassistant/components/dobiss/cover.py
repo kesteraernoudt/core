@@ -75,6 +75,7 @@ class HADobissCover(CoverEntity):
             self._is_velux = True
         self._up = up
         self._down = down
+        self._last_up = False
 
     @property
     def device_class(self):
@@ -85,11 +86,15 @@ class HADobissCover(CoverEntity):
         """Run when this Entity has been added to HA."""
         self._up.register_callback(self.async_write_ha_state)
         self._down.register_callback(self.async_write_ha_state)
+        self._up.register_callback(self.up_callback)
+        self._down.register_callback(self.down_callback)
 
     async def async_will_remove_from_hass(self):
         """Entity being removed from hass."""
         self._up.remove_callback(self.async_write_ha_state)
         self._down.remove_callback(self.async_write_ha_state)
+        self._up.remove_callback(self.up_callback)
+        self._down.remove_callback(self.down_callback)
 
     @property
     def name(self):
@@ -124,6 +129,22 @@ class HADobissCover(CoverEntity):
         if self._is_velux:
             return None
         return self._up.value > 0 if self._up.value else None
+
+    async def async_toggle(self, **kwargs):
+        """Toggle the entity."""
+        if self._last_up:
+            await self.async_close_cover(**kwargs)
+        else:
+            await self.async_open_cover(**kwargs)
+
+    # callbacks to remember last direction
+    def up_callback(self):
+        if self._up.is_on and not self._down.is_on:
+            self._last_up = True
+
+    def down_callback(self):
+        if self._down.is_on and not self._up.is_on:
+            self._last_up = False
 
     # These methods allow HA to tell the actual device what to do. In this case, move
     # the cover to the desired position, or open and close it all the way.

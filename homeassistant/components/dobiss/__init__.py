@@ -13,12 +13,11 @@ import logging
 from dobissapi import DobissAPI, logger
 import requests
 
-# logger.setLevel(logging.DEBUG)
+_LOGGER = logging.getLogger(__name__)
+# _LOGGER.setLevel(logging.DEBUG)
 
 PLATFORMS = ["light", "switch", "sensor", "cover", "binary_sensor"]
 # PLATFORMS = ["light"]
-
-unsub = None
 
 
 async def async_setup(hass: HomeAssistant, config: dict):
@@ -27,36 +26,21 @@ async def async_setup(hass: HomeAssistant, config: dict):
     return True
 
 
-async def update_listener(hass, entry):
-    """Handle options update."""
-    dobiss = hass.data[DOMAIN][entry.entry_id]
-    await dobiss.update_all(force=True)
-
-
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Set up dobiss from a config entry."""
 
-    dobiss = DobissAPI(entry.data["secret"], entry.data["host"], entry.data["secure"])
-    hass.data[DOMAIN][entry.entry_id] = dobiss
-
-    global unsub
-    unsub = entry.add_update_listener(update_listener)
-
-    # logger.setLevel(logging.DEBUG)
-    await dobiss.discovery()
-    hass.async_create_task(dobiss.dobiss_monitor())
-
-    for component in PLATFORMS:
-        hass.async_create_task(
-            hass.config_entries.async_forward_entry_setup(entry, component)
-        )
+    client = HADobiss(hass, entry)
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = client
+    if not await client.async_setup():
+        return False
 
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Unload a config entry."""
-    unsub()
+    if hass.data[DOMAIN][entry.entry_id].unsub:
+        hass.data[DOMAIN][entry.entry_id].unsub()
     unload_ok = all(
         await asyncio.gather(
             *[
@@ -69,3 +53,66 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
         hass.data[DOMAIN].pop(entry.entry_id)
 
     return unload_ok
+
+
+class HADobiss:
+    def __init__(self, hass, config_entry):
+        """Initialize the Dobiss data."""
+        self.hass = hass
+        self.config_entry = config_entry
+        self.api = None
+        self.available = False
+        self.unsub = None
+
+    @property
+    def host(self):
+        """Return client host."""
+        return self.config_entry.data[CONF_HOST]
+
+    async def async_setup(self):
+        """Set up the Dobiss client."""
+        try:
+            self.api = DobissAPI(
+                self.config_entry.data["secret"],
+                self.config_entry.data["host"],
+                self.config_entry.data["secure"],
+            )
+            self.hass.data[DOMAIN][self.config_entry.entry_id] = self.api
+
+            # logger.setLevel(logging.DEBUG)
+            await self.api.discovery()
+            self.hass.async_create_task(self.api.dobiss_monitor())
+
+            self.available = True
+            _LOGGER.debug("Successfully connected to Dobiss")
+
+        except:
+            _LOGGER.exception("Can not connect to Dobiss")
+            self.available = False
+            raise
+
+        self.add_options()
+        self.unsub = self.config_entry.add_update_listener(self.update_listener)
+
+        for component in PLATFORMS:
+            self.hass.async_create_task(
+                self.hass.config_entries.async_forward_entry_setup(
+                    self.config_entry, component
+                )
+            )
+
+        return True
+
+    def add_options(self):
+        """Add options for Glances integration."""
+        if not self.config_entry.options:
+            options = {CONF_INVERT_BINARY_SENSOR: DEFAULT_INVERT_BINARY_SENSOR}
+            self.hass.config_entries.async_update_entry(
+                self.config_entry, options=options
+            )
+
+    @staticmethod
+    async def update_listener(hass, entry):
+        """Handle options update."""
+        dobiss = hass.data[DOMAIN][entry.entry_id]
+        await dobiss.update_all(force=True)
