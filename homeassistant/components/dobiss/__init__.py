@@ -21,6 +21,7 @@ PLATFORMS = ["light", "switch", "sensor", "cover", "binary_sensor"]
 
 SERVICE_ACTION_REQUEST = "action_request"
 SERVICE_STATUS_REQUEST = "status_request"
+SERVICE_FORCE_UPDATE = "force_update"
 
 ATTR_ADDRESS = "address"
 ATTR_CHANNEL = "channel"
@@ -154,6 +155,17 @@ class HADobiss:
             )
             _LOGGER.info(await response.json())
 
+        @callback
+        async def handle_force_update(call):
+            """Handle status_request service."""
+            dobiss = self.hass.data[DOMAIN][self.config_entry.entry_id]
+            await dobiss.update_all(force=True)
+
+        self.hass.services.async_register(
+            DOMAIN,
+            SERVICE_FORCE_UPDATE,
+            handle_force_update,
+        )
         self.hass.services.async_register(
             DOMAIN,
             SERVICE_ACTION_REQUEST,

@@ -1,3 +1,6 @@
+force_update:
+  description: Force all entities to update their status
+
 action_request:
   description: Sends an action request to the dobiss NXT server
   fields:
