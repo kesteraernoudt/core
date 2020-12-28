@@ -10,7 +10,7 @@ from .const import *  # pylint:disable=unused-import
 
 import logging
 
-from dobissapi import DobissAPI, logger
+from dobissapi import DobissAPI
 import requests
 
 _LOGGER = logging.getLogger(__name__)

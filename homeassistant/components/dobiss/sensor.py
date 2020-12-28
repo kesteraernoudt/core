@@ -124,3 +124,10 @@ class HADobissTempSensor(HADobissSensor):
     def state(self):
         """Return the state of the sensor."""
         return self._dobisssensor.value
+
+    @property
+    def device_state_attributes(self):
+        """Return supported attributes."""
+        if self._dobisssensor._tempattributes != None:
+            return self._dobisssensor._tempattributes.json
+        return None
