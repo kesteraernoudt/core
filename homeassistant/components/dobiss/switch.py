@@ -52,8 +52,12 @@ class HADobissSwitch(SwitchEntity):
             "identifiers": {(DOMAIN, self._dobissswitch.object_id)},
             "name": self.name,
             "manufacturer": "dobiss",
-            "dobiss_group": self._dobissswitch.groupname,
         }
+
+    @property
+    def device_state_attributes(self):
+        """Return supported attributes."""
+        return self._dobissswitch.attributes
 
     @property
     def icon(self):

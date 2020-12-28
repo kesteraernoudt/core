@@ -78,9 +78,29 @@ class HADobissCover(CoverEntity):
         self._last_up = False
 
     @property
+    def device_info(self):
+        """Information about this entity/device."""
+        return {
+            "identifiers": {(DOMAIN, self._up.object_id)},
+            "name": self.name,
+            "manufacturer": "dobiss",
+        }
+
+    @property
     def device_class(self):
         """Return the class of this device, from component DEVICE_CLASSES."""
         return self._device_class
+
+    @property
+    def device_state_attributes(self):
+        """Return supported attributes."""
+        prefix = "up_"
+        attr = {prefix + str(key): val for key, val in self._up.attributes.items()}
+        prefix = "down_"
+        attr.update(
+            {prefix + str(key): val for key, val in self._down.attributes.items()}
+        )
+        return attr
 
     async def async_added_to_hass(self):
         """Run when this Entity has been added to HA."""

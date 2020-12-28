@@ -63,8 +63,12 @@ class HADobissLight(LightEntity):
             "identifiers": {(DOMAIN, self._dobisslight.object_id)},
             "name": self.name,
             "manufacturer": "dobiss",
-            "dobiss_group": self._dobisslight.groupname,
         }
+
+    @property
+    def device_state_attributes(self):
+        """Return supported attributes."""
+        return self._dobisslight.attributes
 
     async def async_added_to_hass(self):
         """Run when this Entity has been added to HA."""

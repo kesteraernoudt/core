@@ -4,7 +4,7 @@ import asyncio
 import voluptuous as vol
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 
 from .const import *  # pylint:disable=unused-import
 
@@ -18,6 +18,36 @@ _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS = ["light", "switch", "sensor", "cover", "binary_sensor"]
 # PLATFORMS = ["light"]
+
+SERVICE_ACTION_REQUEST = "action_request"
+SERVICE_STATUS_REQUEST = "status_request"
+
+ATTR_ADDRESS = "address"
+ATTR_CHANNEL = "channel"
+ATTR_ACTION = "action"
+ATTR_OPTION1 = "option1"
+ATTR_OPTION2 = "option2"
+
+
+ACTION_REQUEST_SCHEMA = vol.Schema(
+    vol.All(
+        {
+            vol.Required(ATTR_ADDRESS): vol.Coerce(int),
+            vol.Required(ATTR_CHANNEL): vol.Coerce(int),
+            vol.Required(ATTR_ACTION): vol.Coerce(int),
+            vol.Optional(ATTR_OPTION1): vol.Any(int, float),
+            vol.Optional(ATTR_OPTION2): vol.Any(int, float),
+        }
+    )
+)
+STATUS_REQUEST_SCHEMA = vol.Schema(
+    vol.All(
+        {
+            vol.Optional(ATTR_ADDRESS): vol.Coerce(int),
+            vol.Optional(ATTR_CHANNEL): vol.Coerce(int),
+        }
+    )
+)
 
 
 async def async_setup(hass: HomeAssistant, config: dict):
@@ -100,6 +130,42 @@ class HADobiss:
                     self.config_entry, component
                 )
             )
+
+        @callback
+        async def handle_action_request(call):
+            """Handle action_request service."""
+            dobiss = self.hass.data[DOMAIN][self.config_entry.entry_id]
+            writedata = {
+                "address": call.data.get("address"),
+                "channel": call.data.get("channel"),
+                "action": call.data.get("action"),
+                "option1": call.data.get("option1"),
+                "option2": call.data.get("option2"),
+            }
+            response = await dobiss.request(writedata)
+            _LOGGER.info(await response.json())
+
+        @callback
+        async def handle_status_request(call):
+            """Handle status_request service."""
+            dobiss = self.hass.data[DOMAIN][self.config_entry.entry_id]
+            response = await dobiss.status(
+                call.data.get(ATTR_ADDRESS), call.data.get(ATTR_CHANNEL)
+            )
+            _LOGGER.info(await response.json())
+
+        self.hass.services.async_register(
+            DOMAIN,
+            SERVICE_ACTION_REQUEST,
+            handle_action_request,
+            schema=ACTION_REQUEST_SCHEMA,
+        )
+        self.hass.services.async_register(
+            DOMAIN,
+            SERVICE_STATUS_REQUEST,
+            handle_status_request,
+            schema=STATUS_REQUEST_SCHEMA,
+        )
 
         return True
 

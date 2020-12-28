@@ -61,8 +61,12 @@ class HADobissSensor(Entity):
             "identifiers": {(DOMAIN, self._dobisssensor.object_id)},
             "name": self.name,
             "manufacturer": "dobiss",
-            "dobiss_group": self._dobisssensor.groupname,
         }
+
+    @property
+    def device_state_attributes(self):
+        """Return supported attributes."""
+        return self._dobisssensor.attributes
 
     @property
     def available(self) -> bool:
@@ -124,10 +128,3 @@ class HADobissTempSensor(HADobissSensor):
     def state(self):
         """Return the state of the sensor."""
         return self._dobisssensor.value
-
-    @property
-    def device_state_attributes(self):
-        """Return supported attributes."""
-        if self._dobisssensor._tempattributes != None:
-            return self._dobisssensor._tempattributes.json
-        return None

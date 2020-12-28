@@ -66,8 +66,12 @@ class HADobissBinarySensor(BinarySensorEntity):
             "identifiers": {(DOMAIN, self._dobisssensor.object_id)},
             "name": self.name,
             "manufacturer": "dobiss",
-            "dobiss_group": self._dobisssensor.groupname,
         }
+
+    @property
+    def device_state_attributes(self):
+        """Return supported attributes."""
+        return self._dobisssensor.attributes
 
     @property
     def available(self) -> bool:
