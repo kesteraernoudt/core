@@ -61,7 +61,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Set up dobiss from a config entry."""
 
     client = HADobiss(hass, entry)
-    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = client
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {KEY_API: client}
+
     if not await client.async_setup():
         return False
 
@@ -108,7 +109,8 @@ class HADobiss:
                 self.config_entry.data["host"],
                 self.config_entry.data["secure"],
             )
-            self.hass.data[DOMAIN][self.config_entry.entry_id] = self.api
+            devices = self.api.get_all_devices()
+            self.hass.data[DOMAIN][self.config_entry.entry_id][DEVICES] = devices
 
             # logger.setLevel(logging.DEBUG)
             await self.api.discovery()
@@ -135,7 +137,7 @@ class HADobiss:
         @callback
         async def handle_action_request(call):
             """Handle action_request service."""
-            dobiss = self.hass.data[DOMAIN][self.config_entry.entry_id]
+            dobiss = self.api
             writedata = {
                 "address": call.data.get("address"),
                 "channel": call.data.get("channel"),
@@ -149,7 +151,7 @@ class HADobiss:
         @callback
         async def handle_status_request(call):
             """Handle status_request service."""
-            dobiss = self.hass.data[DOMAIN][self.config_entry.entry_id]
+            dobiss = self.api
             response = await dobiss.status(
                 call.data.get(ATTR_ADDRESS), call.data.get(ATTR_CHANNEL)
             )
@@ -158,7 +160,7 @@ class HADobiss:
         @callback
         async def handle_force_update(call):
             """Handle status_request service."""
-            dobiss = self.hass.data[DOMAIN][self.config_entry.entry_id]
+            dobiss = self.api
             await dobiss.update_all(force=True)
 
         self.hass.services.async_register(
@@ -192,5 +194,5 @@ class HADobiss:
     @staticmethod
     async def update_listener(hass, entry):
         """Handle options update."""
-        dobiss = hass.data[DOMAIN][entry.entry_id]
+        dobiss = hass.data[DOMAIN][entry.entry_id][KEY_API].api
         await dobiss.update_all(force=True)

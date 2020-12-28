@@ -17,7 +17,7 @@ from homeassistant.core import callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.util import color as colorutil
 
-from .const import DOMAIN
+from .const import DOMAIN, KEY_API
 
 import logging
 
@@ -29,7 +29,7 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Set up dobisslights."""
 
-    dobiss = hass.data[DOMAIN][config_entry.entry_id]
+    dobiss = hass.data[DOMAIN][config_entry.entry_id][KEY_API].api
     # _LOGGER.warn("set up dobiss lights on {}".format(dobiss.url))
 
     light_entities = dobiss.get_devices_by_type(DobissLight)

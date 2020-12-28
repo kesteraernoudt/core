@@ -9,7 +9,7 @@ from homeassistant.components.binary_sensor import (
 from homeassistant.core import callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 
-from .const import *  # pylint:disable=unused-import
+from .const import CONF_INVERT_BINARY_SENSOR, DOMAIN, KEY_API
 
 import logging
 
@@ -26,7 +26,7 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Set up dobiss binary sensor."""
 
-    dobiss = hass.data[DOMAIN][config_entry.entry_id]
+    dobiss = hass.data[DOMAIN][config_entry.entry_id][KEY_API].api
     # _LOGGER.warn("set up dobiss switch on {}".format(dobiss.url))
 
     entities = []

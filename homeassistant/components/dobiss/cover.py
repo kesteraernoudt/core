@@ -14,7 +14,7 @@ from homeassistant.components.cover import (
     CoverEntity,
 )
 
-from .const import DOMAIN
+from .const import DOMAIN, KEY_API
 
 from asyncio import wait
 
@@ -33,7 +33,7 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Set up dobissswitch."""
 
-    dobiss = hass.data[DOMAIN][config_entry.entry_id]
+    dobiss = hass.data[DOMAIN][config_entry.entry_id][KEY_API].api
     # _LOGGER.warn(f"set up dobiss switch on {dobiss.host}")
 
     d_entities = dobiss.get_devices_by_type(DobissSwitch)
