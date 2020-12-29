@@ -14,10 +14,8 @@ from dobissapi import DobissAPI
 import requests
 
 _LOGGER = logging.getLogger(__name__)
-# _LOGGER.setLevel(logging.DEBUG)
 
-PLATFORMS = ["light", "switch", "sensor", "cover", "binary_sensor"]
-# PLATFORMS = ["light"]
+PLATFORMS = ["light", "switch", "sensor", "cover", "binary_sensor", "climate"]
 
 SERVICE_ACTION_REQUEST = "action_request"
 SERVICE_STATUS_REQUEST = "status_request"
