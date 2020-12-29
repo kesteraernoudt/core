@@ -66,13 +66,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     if not await client.async_setup():
         return False
 
+    entry.add_update_listener(async_reload_entry)
+
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Unload a config entry."""
-    if hass.data[DOMAIN][entry.entry_id].unsub:
-        hass.data[DOMAIN][entry.entry_id].unsub()
+    if hass.data[DOMAIN][entry.entry_id][KEY_API].unsub:
+        hass.data[DOMAIN][entry.entry_id][KEY_API].unsub()
     unload_ok = all(
         await asyncio.gather(
             *[
@@ -85,6 +87,12 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
         hass.data[DOMAIN].pop(entry.entry_id)
 
     return unload_ok
+
+
+async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry):
+    """Reload config entry."""
+    await async_unload_entry(hass, entry)
+    await async_setup_entry(hass, entry)
 
 
 class HADobiss:
