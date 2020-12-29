@@ -36,8 +36,8 @@ ACTION_REQUEST_SCHEMA = vol.Schema(
             vol.Required(ATTR_ADDRESS): vol.Coerce(int),
             vol.Required(ATTR_CHANNEL): vol.Coerce(int),
             vol.Required(ATTR_ACTION): vol.Coerce(int),
-            vol.Optional(ATTR_OPTION1): vol.Any(int, float),
-            vol.Optional(ATTR_OPTION2): vol.Any(int, float),
+            vol.Optional(ATTR_OPTION1): vol.Any(int),
+            vol.Optional(ATTR_OPTION2): vol.Any(int),
         }
     )
 )
@@ -139,12 +139,15 @@ class HADobiss:
             """Handle action_request service."""
             dobiss = self.api
             writedata = {
-                "address": call.data.get("address"),
-                "channel": call.data.get("channel"),
-                "action": call.data.get("action"),
-                "option1": call.data.get("option1"),
-                "option2": call.data.get("option2"),
+                ATTR_ADDRESS: call.data.get(ATTR_ADDRESS),
+                ATTR_CHANNEL: call.data.get(ATTR_CHANNEL),
+                ATTR_ACTION: call.data.get(ATTR_ACTION),
             }
+            if ATTR_OPTION1 in call.data:
+                writedata[ATTR_OPTION1] = call.data.get(ATTR_OPTION1)
+            if ATTR_OPTION2 in call.data:
+                writedata[ATTR_OPTION2] = call.data.get(ATTR_OPTION2)
+            _LOGGER.info(f"sending action request {writedata}")
             response = await dobiss.request(writedata)
             _LOGGER.info(await response.json())
 

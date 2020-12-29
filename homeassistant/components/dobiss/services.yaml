@@ -21,6 +21,7 @@ action_request:
       example: 50
 
 # from the Dobiss API info
+# blijkbaar is voor temp, option1 = (target-5)*10
 #{
 #     "address"   : VERPLICHT, adres van de module of het NXT actie adres (>200),
 #     "channel"   : VERPLICHT, module uitgang (start bij 0) of NXT uitgang nummer (start op 1),
