@@ -1,6 +1,19 @@
 force_update:
   description: Force all entities to update their status
 
+set_hvac_temp_timer:
+  description: Set the temperature and time to stay in manual mode for a specific zone
+  fields:
+    entity_id:
+      description: Which zone to set the timer for
+      example: climate.binnen
+    time:
+      description: Optional, How long should this zone stay in manual mode, in minutes. Default 30 minutes
+      example: 90
+    temperature:
+      description: Optional, What target temperature to set this zone to. Default current target temperature
+      example: 22.5
+
 action_request:
   description: Sends an action request to the dobiss NXT server
   fields:

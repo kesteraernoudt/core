@@ -6,7 +6,9 @@ from homeassistant.const import (
     DEVICE_CLASS_TEMPERATURE,
     DEVICE_CLASS_ILLUMINANCE,
     TEMP_CELSIUS,
+    ATTR_TEMPERATURE,
 )
+
 from homeassistant.core import callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.components.climate.const import (
@@ -25,6 +27,10 @@ from homeassistant.components.climate import (
     SUPPORT_TARGET_TEMPERATURE,
     HVAC_MODE_HEAT,
 )
+import voluptuous as vol
+
+from homeassistant.helpers.config_validation import entity_id, time
+from homeassistant.const import ATTR_ENTITY_ID, ATTR_TEMPERATURE, ATTR_TIME
 
 from .const import DOMAIN, KEY_API
 
@@ -37,6 +43,18 @@ from dobissapi import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+SERVICE_SET_HVAC_TEMP_TIMER = "set_hvac_temp_timer"
+
+SET_HVAC_TEMP_TIMER_SCHEMA = vol.Schema(
+    vol.All(
+        {
+            vol.Required(ATTR_ENTITY_ID): vol.Coerce(entity_id),
+            vol.Optional(ATTR_TIME): vol.Coerce(int),
+            vol.Optional(ATTR_TEMPERATURE): vol.Coerce(float),
+        }
+    )
+)
 
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
@@ -54,6 +72,26 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         entities.append(HADobissClimateControl(d))
     if entities:
         async_add_entities(entities)
+
+    async def handle_set_hvac_temp_timer(call):
+        """Handle set_hvac_timer service."""
+        entity_id = call.data.get(ATTR_ENTITY_ID)
+        entity = next(
+            (dev for dev in entities if dev.entity_id == entity_id),
+            None,
+        )
+        if entity == None:
+            raise ValueError(f"no entity found in {DOMAIN} that matches {entity_id}")
+        time = call.data.get(ATTR_TIME, 30)
+        temp = call.data.get(ATTR_TEMPERATURE, entity._dobisssensor.asked)
+        await entity._dobisssensor.set_temp_timer(temp, time)
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_SET_HVAC_TEMP_TIMER,
+        handle_set_hvac_temp_timer,
+        schema=SET_HVAC_TEMP_TIMER_SCHEMA,
+    )
 
 
 class HADobissClimateControl(ClimateEntity):
@@ -120,13 +158,14 @@ class HADobissClimateControl(ClimateEntity):
     @property
     def target_temperature_step(self):
         """Return the supported step of target temperature."""
-        return 0.5
+        return 0.1
 
     async def async_set_temperature(self, **kwargs):
-        await self._dobisssensor.set_temperature(**kwargs)
+        value = kwargs.get(ATTR_TEMPERATURE, self.target_temperature)
+        await self._dobisssensor.set_temperature(value)
 
     async def async_set_hvac_mode(self, hvac_mode: str):
-        await self._dobisssensor.set_hvac_mode(hvac_mode)
+        await self._dobisssensor.set_manual_mode(hvac_mode == HVAC_MODE_HEAT)
 
     async def async_set_preset_mode(self, preset_mode: str):
         await self._dobisssensor.set_preset_mode(preset_mode)
@@ -147,9 +186,7 @@ class HADobissClimateControl(ClimateEntity):
         """Return hvac operation ie. heat, cool mode.
         Need to be one of HVAC_MODE_*.
         """
-        if self._dobisssensor.time == None:
-            return HVAC_MODE_OFF
-        if self._dobisssensor.time >= 0:
+        if self._dobisssensor.time != None and self._dobisssensor.time >= 0:
             return HVAC_MODE_HEAT
         return HVAC_MODE_AUTO
 
@@ -161,7 +198,6 @@ class HADobissClimateControl(ClimateEntity):
         modes = []
         modes.append(HVAC_MODE_HEAT)
         modes.append(HVAC_MODE_AUTO)
-        modes.append(HVAC_MODE_OFF)
         return modes
 
     @property

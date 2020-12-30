@@ -1,6 +1,10 @@
 """The dobiss integration."""
 import asyncio
 
+from dobissapi.dobissapi import DobissTempSensor
+from homeassistant.helpers.config_validation import entity_id, time
+from homeassistant.const import ATTR_ENTITY_ID, ATTR_TEMPERATURE, ATTR_TIME
+
 import voluptuous as vol
 
 from homeassistant.config_entries import ConfigEntry
@@ -26,7 +30,6 @@ ATTR_CHANNEL = "channel"
 ATTR_ACTION = "action"
 ATTR_OPTION1 = "option1"
 ATTR_OPTION2 = "option2"
-
 
 ACTION_REQUEST_SCHEMA = vol.Schema(
     vol.All(
@@ -189,7 +192,6 @@ class HADobiss:
             handle_status_request,
             schema=STATUS_REQUEST_SCHEMA,
         )
-
         return True
 
     def add_options(self):
