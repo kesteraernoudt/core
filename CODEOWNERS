@@ -110,7 +110,6 @@ homeassistant/components/dexcom/* @gagebenne
 homeassistant/components/digital_ocean/* @fabaff
 homeassistant/components/directv/* @ctalkington
 homeassistant/components/discogs/* @thibmaek
-homeassistant/components/dobiss/* @kesteraernoudt
 homeassistant/components/doorbird/* @oblogic7 @bdraco
 homeassistant/components/dsmr/* @Robbie1221
 homeassistant/components/dsmr_reader/* @depl0y
